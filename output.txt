@@ -1,0 +1,1482 @@
+Vol. 21, n.°1, pp. 43-56, 2022
+
+Revista UIS Ingenierías
+Página de la revista: https://revistas.uis.edu.co/index.php/revistauisingenierias
+
+Diseño de una herramienta computacional
+para el análisis termodinámico de motores de
+combustión interna tipo Otto
+Design of a computational tool for
+thermodynamic analysis of Otto type internal
+combustion engines
+Santiago Valencia-Cañola 1a, Khaleb Téllez-Soleimán 1b, Tadashi Kadowaki-Jiménez 1c,
+Carlos Bustamante-Chaverra 1d
+1
+
+Grupo de investigación en Energía y Termodinámica, Universidad Pontificia Bolivariana, Colombia.
+Correos electrónicos: a santiago.valenciac@upb.edu.co,
+b
+khalleb.tellez@upb.edu.co, c tadashi.kadowaki@upb.edu.co, d carlos.bustamante@upb.edu.co
+Orcid: a 0000-0002-3117-1705, d 0000-0001-6625-1804
+Recibido: 20 noviembre, 2020. Aceptado: 16 junio, 2021. Versión final: 24 septiembre, 2021.
+
+Resumen
+Se obtiene una completa descripción del comportamiento termodinámico de un motor tipo Otto en función del ángulo
+de giro del eje mediante un código en lenguaje Python. A partir de los resultados, se estiman indicadores de alta
+relevancia técnica como la presión efectiva indicada, la potencia específica de freno, el consumo específico de
+combustible y la eficiencia volumétrica. El método propuesto soluciona balances de masa y energía en estado
+transitorio incluyendo flujo compresible a través de las válvulas y velocidad de combustión. La validación del código
+implementado se realiza mediante comparación con mediciones experimentales para funcionamiento de motor en
+modo de arrastre y a condiciones de velocidad angular constante. Empleando la metodología desarrollada, se
+encuentran resultados más realistas para, entre otros indicadores, la eficiencia térmica, eficiencia volumétrica y la
+presión media efectiva, y es posible predecir de manera precisa y eficiente el comportamiento termodinámico de
+motores tipo Otto.
+Palabras clave: motor de combustión interna; comportamiento transitorio; análisis termodinámico; ciclo Otto;
+Cantera; transferencia de calor; comportamiento en arrastrado; presión en cámara; eficiencia térmica; Python.
+Abstract
+A complete description of the thermodynamic behavior of an Otto cycle engine is obtained in terms of the shaft rotation
+angle by a Python code. Based on the results, indicators of high technical relevance are calculated, including the
+effective pressure, the specific break power, the exact fuel consumption, and the volumetric efficiency. The proposed
+method solves transient mass and energy balances including compressible flow through the valves and combustion
+speed. The implemented code is validated by comparing numerical results with experimental measurements of an
+engine operating without combustion stage and at constant angular speed. By using the developed methodology, more
+conservative and realistic results are found for, among other indicators, thermal efficiency, volumetric efficiency and
+effective average pressure, and it is possible to predict the thermodynamic behavior of Otto cycle engines in an accurate
+and efficient way.
+Keywords: internal combustion engine; thermodynamic analysis; transient behavior; Otto cycle; Quarry; heat transfer;
+dragged behavior; chamber pressure; thermal efficiency; Python.
+ISSN impreso: 1657 - 4583. ISSN en línea: 2145 - 8456, CC BY-ND 4.0
+Como citar: S. Valencia-Cañola, K. Téllez-Soleimán, T. Kadowaki-Jiménez, C. Bustamante-Chaverra, “Diseño de una
+herramienta computacional para el análisis termodinámico de motores de combustión interna tipo Otto,” Rev. UIS Ing.,
+vol. 21, no. 1, pp. 43-56, 2022, doi: https://doi.org/10.18273/revuin.v21n1-2022004.
+
+44
+
+S. Valencia-Cañola, K. Téllez-Soleimán, T. Kadowaki-Jiménez, C. Bustamante-Chaverra
+
+1. Introducción
+Las herramientas computacionales pueden jugar un papel
+determinante en los procesos de diseño y análisis de
+motores de combustión interna, tienen la capacidad de
+estimar de forma eficiente y precisa variables como
+presión y temperatura máxima de funcionamiento, e
+indicadores de funcionamiento como la eficiencia
+térmica y volumétrica, el torque y presión media efectiva.
+Estas representan una contribución tanto al estado del
+arte como a la técnica, permiten al diseñador realizar
+análisis de sensibilidad de parámetros geométricos,
+estequiométricos y de condiciones de funcionamiento.
+También, podrían reducir costos y tiempos asociados a la
+evaluación experimental. Una aplicación de estas
+herramientas, enfocada al diseño y predicción
+operacional, son los motores de combustión interna,
+específicamente, los de ciclo Otto y diésel. El ciclo Otto
+se entiende como un proceso de cuatro tiempos iterativo,
+donde dos revoluciones del cigüeñal hacen que el pistón
+realice cuatro recorridos. Durante este ciclo ocurren
+compresión, combustión a volumen constante,
+expansión, escape y admisión [1], [2].
+Pulkrabek [3] propone un modelo teórico para el cálculo
+de indicadores termodinámicos, basado en balances de
+energía en un ciclo Otto ideal, en donde se asume la
+condición de aire frío para la mezcla aire combustible y
+gases de combustión, procesos de compresión y
+expansión isotrópicos, discretización en estados de
+pseudoequilibrio y combustión instantánea para el
+cálculo de las propiedades termodinámicas en el ciclo.
+Los resultados de este tipo de modelos pueden ser
+empleados para obtener una primera estimación de los
+indicadores y la verificación de metodologías más
+refinadas.
+Figueiredo [4] presenta un modelo de cálculo de la
+termodinámica de un motor de combustión interna en
+estado transitorio más realista, dado que se consideran,
+entre otros aspectos, procesos de transferencia de calor,
+presencia de fase quemada y no quemada y velocidad de
+flama en términos del ángulo de giro del cigüeñal.
+Modelos similares han sido empleados para simular el
+comportamiento termodinámico de motores de
+combustión interna con diferentes combustibles y en
+diferentes condiciones de operación.
+Ambros et al. [5] simulan el funcionamiento de un motor
+tipo Otto con mezclas de etanol-agua; encuentran, a partir
+de los resultados obtenidos, que la mezcla 70 % v/v
+etanol, 30 % v/v agua ofrece un mejor rendimiento en
+términos de torque, potencia, eficiencia y consumo
+específico. También sugieren que una ignición en el
+
+punto de máximo torque puede mejorar el rendimiento
+del motor. A pesar del hecho de obtener errores en los
+resultados numéricos menores al 13 %, los autores
+mencionan la necesidad de mejorar la herramienta
+incluyendo el modelado termodinámico de los tiempos
+de admisión y escape.
+Barjaneh y Sayyaadi [6] desarrollan un nuevo modelo
+cerrado termodinámico, basado en la termodinámica de
+velocidad finita (FST), en el cual se corrigen errores
+surgidos por los límites de reversibilidad normalmente
+obtenidos de modelos basados en la termodinámica de
+tiempo finito (FTT). Luego de una comparación entre
+ambos modelos, llegaron a una reducción de error en el
+cálculo de la potencia estimada del 167,5 % en el modelo
+FTT a un 39 % en el nuevo modelo basado en FST. Los
+autores concluyen que el método FST tiene superioridad
+considerable en la obtención de resultados como
+potencia, eficiencia térmica y temperaturas de operación.
+Nunes de Faria et al. [7] presentan una simulación
+termodinámica de un motor de combustión interna tipo
+Otto con el uso de biogás como combustible alternativo.
+Se empleó un modelo de simulación de dimensión cero
+para predecir características de rendimiento tales como
+presión efectiva media y potencia indicada. El modelo
+fue validado experimentalmente para la potencia
+indicada; se evidenció un bajo rendimiento del motor con
+este tipo de combustible. Los autores sugieren mejorar el
+modelo para incluir cambios de composición química del
+biogás simulado y así obtener resultados de rendimiento
+en función de este parámetro.
+De acuerdo con Abedin et al. [8], es pertinente realizar
+investigaciones teóricas considerando la influencia de los
+parámetros
+estequiométricos,
+propiedades
+termodinámicas y de velocidades de flama en la
+estimación del funcionamiento del motor empleando
+combustibles alternativos.
+Adicionalmente, y como lo menciona Alagumalai et al.
+[9], las desventajas encontradas en términos de eficiencia
+térmica al emplear combustibles duales pueden ser
+mitigadas mediante la puesta a punto del motor, asistida
+por herramientas computacionales.
+Además, de acuerdo con Nunes de Faria et al. [7], resulta
+necesario implementar relaciones de Wiebe más
+acertadas, que disminuyan la incertidumbre asociada a la
+modelación del proceso de combustión. También se
+resaltan los beneficios de las herramientas de simulación
+para encontrar las mejores condiciones de operación, en
+su caso, aplicadas a diferentes combustibles alternativos.
+
+Diseño de una herramienta computacional para el análisis termodinámico de motores de combustión interna
+tipo Otto
+
+En este trabajo se presenta la formulación,
+implementación computacional y validación de un
+modelo termodinámico basado en balances transitorios
+de masa y energía en términos del ángulo del eje del
+cigüeñal.
+El código computacional es implementado en lenguaje
+Python; se emplea la librería Cantera para el cálculo de
+propiedades termodinámicas. Los resultados obtenidos
+se comparan con los del modelo pseudotransitorio. La
+herramienta computacional desarrollada se valida
+mediante la comparación con perfiles de temperatura y
+presión obtenidos por otros autores en condiciones de
+arrastrado y funcionamiento a velocidad angular
+constante. En la siguiente sección se presentan el modelo
+pseudotransitorio y los indicadores relevantes para el
+diseño termodinámico de motores de combustión interna.
+Posteriormente, se presenta el modelo transitorio
+propuesto en función del ángulo de giro del eje del motor.
+En la sección 3 se presentan los resultados obtenidos
+mediante los modelos pseudotransitorio y transitorio, la
+validación en condición de arrastrado (sin combustión) y
+en condiciones normales de funcionamiento.
+2. Modelos matemáticos
+El modelo pseudotransitorio es una primera
+aproximación a la descripción termodinámica y a la
+obtención de parámetros de rendimiento del motor tipo
+Otto. Este modelo es detallado a continuación como una
+introducción al modelo transitorio desarrollado,
+implementado y validado en el presente trabajo. El
+modelo transitorio que simula el comportamiento
+termodinámico del motor en dos giros del cigüeñal,
+correspondientes a los cuatro tiempos del motor, es
+explicado en la segunda parte de esta sección.
+2.1. Modelo pseudotransitorio
+Las ecuaciones que describen la termodinámica del
+motor tipo Otto se resuelven mediante un código en el
+entorno de Python [11], que emplea la librería Cantera
+[10] y que se puede encontrar en el enlace
+https://github.com/candresb19/Potice/blob/main/poticev
+1.5.py. El código emplea la librería Scipy para la solución
+de problemas de valor inicial, con el objetivo de
+solucionar las ecuaciones diferenciales ordinarias que
+representan los balances transitorios de masa y energía al
+interior del cilindro. La librería Cantera permite definir la
+sustancia de trabajo, en este caso, aire (admisión y
+compresión) y gases de combustión (expansión y
+rechazo), y calcular el estado termodinámico en cada
+punto del ciclo a partir de dos propiedades
+independientes. El ciclo Otto es discretizado en cinco
+puntos de pseudoequilibrio: 0) comienzo de la
+
+45
+
+compresión isentrópica, 1) principio de la ignición, 2)
+comienzo de la expansión, 3) comienzo de salida de calor
+representado el efecto termodinámico de salida de los
+gases y 4) final del rechazo de los gases.
+En cada uno de estos puntos, se define el estado
+termodinámico a partir de dos propiedades intensivas.
+Para el punto 0, se calcula el estado con presión y
+temperatura iniciales. En los demás puntos, el estado es
+calculado a partir de las temperaturas y otra propiedad
+termodinámica, de acuerdo con los balances de energía,
+detallados más adelante en esta sección.
+Calculados los estados termodinámicos, la eficiencia
+térmica del motor (3) se obtiene considerando las
+definiciones del calor específico de salida q y el trabajo
+específico neto, 𝑤𝑛𝑒𝑡𝑜 , dados por:
+𝑞𝑜𝑢𝑡 = 𝑢4− 𝑢0
+
+(1)
+
+𝑤𝑛𝑒𝑡𝑜 = 𝑞𝑖𝑛 − 𝑞𝑜𝑢𝑡
+
+(2)
+
+𝜂=
+
+𝑤𝑛𝑒𝑡𝑜
+𝑞𝑖𝑛
+
+(3)
+
+Donde u es la energía interna y qin es el calor de entrada
+que corresponde a la energía liberada durante el proceso
+de combustión y que se calcula como el producto entre el
+poder calorífico, la fracción másica de combustible en la
+mezcla y la eficiencia de combustión. Esta última se
+estima proporcionalmente al porcentaje de combustible
+quemado y a la transferencia de calor durante el proceso.
+A partir de estas cantidades es posible encontrar un valor
+preliminar para los indicadores de rendimiento descritos
+a continuación y definidos por las ecuaciones (4)-(9).
+𝐼𝑚𝑒𝑝 =
+
+𝑃𝑖 =
+
+𝑤𝑛𝑒𝑡𝑜
+𝑣0− 𝑣1
+
+𝑤𝑛𝑒𝑡𝑜 (
+2
+
+(4)
+
+𝜔
+)
+60 𝑁
+
+𝑐
+
+(5)
+
+Imep es la presión efectiva indicada, 𝑣 es el volumen del
+cilindro en diferentes puntos del ciclo, 𝑃𝑖 es la potencia
+indicada, ω es la velocidad angular del motor, 𝑁𝑐 es el
+número de cilindros.
+𝑃𝑏 = 𝜂𝑚 𝑃𝑖
+
+(6)
+
+𝑃𝑏 es el trabajo y la potencia de freno, es decir, la
+potencia disponible en el eje de salida del motor después
+de considerarse la eficiencia mecánica del arreglo
+compuesto por el pistón, las bielas, los acoples y los
+ejes, 𝜂𝑚 .
+
+46
+
+S. Valencia-Cañola, K. Téllez-Soleimán, T. Kadowaki-Jiménez, C. Bustamante-Chaverra
+
+Otros indicadores importantes del rendimiento del motor
+son la potencia específica de freno (BSP), que indica la
+potencia por unidad de área transversal considerando el
+diámetro del cilindro (D), y el consumo específico de
+combustible (bsf), como la relación entre la masa de
+combustible 𝑚𝑓 , dada la velocidad angular 𝜔, el número
+de cilindros y la potencia de freno.
+𝑃𝑏
+𝐵𝑆𝑃 =
+𝑁
+(7)
+𝜋𝐷2 𝑐
+4
+𝜔
+𝑚𝑓 ( ) 𝑁𝑐
+4
+(8)
+𝑏𝑠𝑓𝑐 =
+2𝑃𝑏
+𝑚𝐴
+𝜂𝑣 =
+(9)
+𝜌𝑎𝑖𝑟𝑒 𝑉𝑑
+El ciclo ideal con suposición de aire frío y procesos
+isentrópicos de compresión y expansión, presentado en
+[3], es refinado para obtener un modelo
+pseudotransitorio, al incluir la composición de la mezcla
+aire combustible a partir de balances estequiométricos y
+procesos politrópicos de compresión y expansión y
+transferencia de calor al exterior del cilindro mediante los
+balances de energía (10), (11) y (12), de los cuales se
+obtienen, respectivamente, los valores de temperatura
+𝑇2, 𝑇3 𝑦 𝑇4 .
+(𝑇3 + 𝑇4 )
+𝑅(𝑇4 − 𝑇3 )
+− 𝑈𝐴(
+− 𝑇∞ )
+1−𝑛
+2
+
+(10)
+
+(𝑇1 + 𝑇2 )
+𝑅(𝑇2 − 𝑇1 )
+− 𝑈𝐴(
+− 𝑇∞ )
+1−𝑛
+2
+
+(11)
+
+𝐶𝑣̅ (𝑇4 − 𝑇3 ) = −
+𝐶𝑣̅ (𝑇2 − 𝑇1 ) =
+
+𝐶𝑣̅ (𝑇3 − 𝑇2 ) = 𝑞𝑖𝑛 − 𝑈𝐴(
+
+(𝑇3 + 𝑇4 )
+− 𝑇∞ )
+2
+
+(12)
+
+0,8
+
+ℎ𝑔 = 𝐶1 𝑉 −0,06 𝑇 −0,4 𝑃0,8 (𝑉𝑝 𝐶2 )
+𝑈=
+
+1
+𝑟
+ln ( 𝑒 )
+1
+𝑟𝑖
+1
++
++
+ℎ𝑔 𝐴𝑖
+2𝑘𝑆𝜋 𝐴ℎ0
+
+𝑛=
+
+𝑛𝑝 𝛾
+1 + 𝑛𝑝 𝑑𝛾 − 𝛾
+
+(13)
+
+Donde 𝜂𝑝 es la eficiencia de trabajo politrópico, tomada
+como un valor promedio típico para motores tipo Otto. El
+coeficiente de transferencia de calor U se calcula a partir
+del circuito térmico equivalente entre la temperatura al
+interior del cilindro y la temperatura del medio
+refrigerante [12], de acuerdo con (15) y utilizando la
+correlación de Hohemberg (14) [13] para calcular el
+coeficiente de transferencia por convección dentro del
+cilindro hg.
+
+(15)
+
+En las ecuaciones anteriores, se define a partir de la
+literatura
+𝐶1 = 130;
+𝐶2 = 1,4;
+𝑉𝑝 , la velocidad lineal del pistón; 𝐴𝑖 , el área interna del
+cilindro; 𝑟𝑒 , el radio externo del cilindro; 𝑟𝑖 , el radio
+interno del cilindro; 𝑘, el coeficiente de conductividad
+térmica del material del cilindro, y ℎ0 es el coeficiente de
+convección con el refrigerante.
+2.2. Modelo transitorio
+Para obtener resultados más realistas y conservativos, se
+implementa un modelo transitorio para hallar la
+temperatura y presión por medio de funciones, que están
+en relación con el ángulo de giro del eje del motor (θ).
+A partir de parámetros geométricos del motor (radio de
+compresión 𝑟𝑐 , volumen máximo del cilindro 𝑉𝑚 , relación
+entre longitudes de biela y manivela 𝑅𝑐 y el análisis
+cinemático del mecanismo eje-biela-pistón) se obtiene la
+expresión (16) para el volumen del cilindro en términos
+de θ. La tasa de cambio del volumen (17) se obtiene al
+derivar esta expresión con respecto al ángulo.
+1 1
+1
+𝑣(𝜃) = 𝑉𝑚 ( + (1 − )) (1 + cos(𝜃) + 𝑅𝑐
+𝑟𝑐 2
+𝑟𝑐
+− √𝑅𝑐 2 − (sin(𝜃))2 )
+
+En las ecuaciones anteriores, 𝐶𝑣̅ es el calor específico
+promedio a volumen constante, R es la constante de gases
+ideales del aire, n es el exponente de trabajo politrópico,
+U es el coeficiente global de transferencia de calor, A es
+el área de transferencia de calor y 𝑇∞ es la temperatura
+del fluido de refrigeración. El coeficiente n es calculado
+en términos de las relaciones de calores específicos ϒ, de
+acuerdo con la expresión (13).
+
+(14)
+
+𝑑𝑣 𝑉𝑚
+1
+sin(𝜃) cos(𝜃)
+=
+(1 − )(
+− sin(𝜃)
+𝑑𝜃
+2
+𝑟𝑐
+√𝑅𝑐 2 − (sin(𝜃))2
+
+(16)
+
+(17)
+
+Para la etapa de compresión, se asume una mezcla de aire
+y una fracción remanente de los gases de combustión en
+el interior del cilindro. Las propiedades del gas se
+diferencian del aire con el subíndice g. A partir del
+balance de energía en el cilindro, se obtiene una
+expresión para el cambio de temperatura con respecto al
+ángulo de rotación (18), que para la etapa de compresión
+va desde el cierre de la válvula de admisión
+(aproximadamente 0 radianes) hasta poco antes del punto
+muerto superior (π radianes), dado que la combustión
+comienza unos instantes antes de alcanzar este punto.
+(𝑥𝑅𝑔 + (1 − 𝑥)𝑅)𝑇 𝑑𝑣
+𝑑𝑇
+𝑄̂
+=
+−
+𝑑𝜃 𝑚𝑡 𝐴
+𝐴𝑉
+𝑑𝜃
+
+(18)
+
+Diseño de una herramienta computacional para el análisis termodinámico de motores de combustión interna
+tipo Otto
+
+En la ecuación anterior, 𝑄̂ es el calor por radianes que
+sale del motor, calculado a partir de (15); 𝑚𝑡 es la masa
+total dentro del cilindro; 𝑅 es la constante de los gases; 𝑥
+equivale a la fracción de masa de gases de combustión
+dada por (19), y 𝐴 es la función de los calores específicos
+(20).
+𝑚𝑔
+𝑚𝑡
+𝐴 = 𝑥(𝐶𝑣𝑔 − 𝐶𝑣 ) + 𝐶𝑣
+𝑥=
+
+(19)
+
+El proceso de combustión comienza en un ángulo
+determinado por la ignición y termina en el punto donde
+se consume el combustible al interior del cilindro;
+además del balance de energía para la mezcla sin quemar
+(21) y para los gases (quemados) (22), se requieren
+balances de masa, dado que la masa de aire-combustible
+se transforma en masa de gases.
+
+𝑑𝑉𝑔
+𝑚𝐹
+̂
+𝑑𝑇𝑔 𝑄𝑔 − 𝑃 ( 𝑑𝜃 ) 𝜔 + 𝑚̇𝑔 (𝐶𝑝 𝑇 − 𝐶𝑝𝑔 𝑇𝑔 + 𝑃𝐶𝐼 𝑚 )
+=
+𝑑𝜃
+𝑚𝑔 𝐶𝑣𝑔 𝜔
+
+𝑑𝑉 𝑚̇𝑣 𝑉 𝑑𝑉
+=
++
+𝑑𝜃 𝑚𝑡 𝑣 𝑑𝜃
+
+(25)
+
+1 2 𝑑𝑣 2𝑣𝑟𝑎
+𝑟
++
+𝑉𝑓
+𝑑𝑉𝑔 𝑅𝑎 2 𝑎 𝑑𝜃 𝑅𝑎 2
+=
+𝑑𝜃
+𝑤
+
+(26)
+
+1 𝑑𝑉 𝑣𝑔 𝑉𝑔 𝑑𝑣
+− 2
+)
+𝑣 𝑑𝜃
+𝑣 𝑑𝜃
+
+(27)
+
+𝑚̇𝑔 = −𝑚̇
+
+(28)
+
+𝑚̇ = −𝑚(
+
+(20)
+
+La ecuación (18) se resuelve mediante la función Odeint
+[14] de la librería SciPy de Python, en términos de la
+temperatura en cada uno de los pasos de ángulo en que se
+divide el intervalo de 0 hasta el ángulo de inicio de la
+combustión. Las demás propiedades termodinámicas se
+calculan con la librería Cantera, a partir de la temperatura
+y la densidad. Esta última se calcula con base en las
+masas de aire y gases conocidas desde la estequiometría
+y el cambio del volumen del cilindro. Los valores
+iniciales de temperatura corresponden a los valores en el
+estado (0) en el método pseudotransitorio.
+
+𝑑𝑉
+𝑑𝑇 𝑄̂𝑖𝑛𝑞 − 𝑃 (𝑑𝜃 ) 𝜔 + 𝑚̇(𝐶𝑣 − 𝐶𝑝 )𝑇
+=
+𝑑𝜃
+𝑚𝐶𝑣 𝜔
+
+47
+
+(21)
+(22)
+
+La tasa de transferencia de calor ̂
+𝑄 se pondera con la
+fracción másica de gases de combustión 𝑥 para
+diferenciar entre la transferencia de calor desde los
+inquemados (23) y desde los gases de combustión (24).
+Así mismo, las ecuaciones (25) y (26) son empleadas
+para calcular, respectivamente, el volumen de
+inquemados y quemados. P es la presión dentro del
+cilindro; ω es la velocidad angular del cigüeñal; 𝑚̇ es el
+cambio de masa de inquemados, dado por la ecuación
+(27); 𝑚̇𝑔 es el cambio de masa de quemados, calculado a
+partir del balance de masa al interior del cilindro (28).
+𝑄̂𝑖𝑛𝑞 = (1 − 𝑥)𝑄̂
+
+(23)
+
+𝑄̂𝑔 = 𝑥𝑄̂
+
+(24)
+
+En las ecuaciones anteriores, 𝑅𝑎 es el radio del cilindro,
+𝑟𝑎 es el radio de la llama de la combustión que se propaga
+con una velocidad 𝑉𝑓 . Por simplicidad, se considera
+constante partiendo del valor reportado de 0,4 m/s [4]
+para motores tipo Otto a gasolina.
+Para la solución numérica de (21), (22) y (28), y dado el
+grado de stiffness o rigidez de las ecuaciones, se emplea
+la función Solve_ivp [15] de la librería Scipy de Python,
+basada en el método de Runge-Kutta.
+Para la expansión, que va desde el final de la combustión
+hasta la apertura de la válvula de rechazo, se asume que
+el contenido total del cilindro son gases de combustión
+(quemados) y que su masa es constante. La expresión
+obtenida del balance de energía para el cambio de
+temperatura con respecto al ángulo para este proceso está
+dada por la expresión (29).
+𝑑𝑇𝑔
+𝑄̂𝑔
+𝑇𝑔 𝑑𝑣
+=
+− 𝑅𝑔
+𝑑𝜃
+𝑚𝑔 𝐶𝑣𝑔
+𝐶𝑣𝑔 𝑣 𝑑𝜃
+
+(29)
+
+Para la solución numérica de las ecuaciones de los
+procesos de expansión, escape y admisión, se utiliza la
+función Odeint, puesto que las ecuaciones no presentan
+rigidez.
+En los procesos de escape y admisión, se introducen
+parámetros geométricos y de funcionamiento de las
+válvulas, para tener en cuenta la caída de presión de
+salida y la entrada de fluidos a través de los orificios y el
+trabajo asociado a estos procesos. La ecuación (30) se
+emplea para calcular el área de los orificios de las
+válvulas, que se encuentra en términos del lift o
+levantamiento de la válvula, dado por la ecuación (31),
+en términos del ángulo de giro y de los parámetros
+geométricos.
+1
+𝐴𝑣 = min(𝜋𝐷𝑙(𝜃), 𝜋(𝐷 2 − 𝑑 2 )
+4
+𝑙𝑚
+𝑙(𝜃) = (1 − cos(𝜃))
+2
+
+(30)
+(31)
+
+48
+
+S. Valencia-Cañola, K. Téllez-Soleimán, T. Kadowaki-Jiménez, C. Bustamante-Chaverra
+
+En estas expresiones, 𝐷 es el diámetro de la cabeza de la
+válvula, 𝑑 es el diámetro del vástago de la válvula y 𝑙𝑚 es
+el levantamiento máximo de la misma.
+Conociendo el área de salida o entrada, se puede estimar
+el flujo másico a partir de la siguiente ecuación de flujo,
+compresible a través de una válvula.
+𝑘+1
+
+2 2(𝑘+1)
+𝑚𝑐𝑟 = ±𝜌0 𝐶𝑓 𝐴𝑚 ∗ 𝑐0 ∗ (
+)
+𝑘+1
+
+(32)
+
+Donde 𝜌0 es la densidad del fluido, en este caso quemados
+(escape) o inquemados (admisión); 𝐶𝑓 es el coeficiente de
+fricción, que para este tipo de válvulas se fija en 0,4 [4];
+𝑐0 es la velocidad del sonido en el fluido, dada para gases
+ideales por (33); y k es la relación de calores específicos.
+𝑐0 = √𝑘𝑅𝑇
+
+(33)
+
+El proceso de escape comienza con la apertura y termina
+con el cierre de la válvula de escape. El balance de masa
+para el proceso de escape estaría dado por la ecuación
+(32), donde 𝑚𝑐𝑟𝑔 es el flujo másico de quemados, como
+se muestra en la ecuación (34).
+
+𝑑𝑚𝑔
+𝑚𝑐𝑟𝑔
+= −𝑚
+̂ 𝑐𝑟𝑔 = −
+𝑑𝜃
+𝜔
+
+(34)
+
+El balance de energía para este proceso está dado por la
+ecuación (35), en términos de las propiedades de los
+inquemados.
+𝑑𝑇𝑔
+𝑄̂𝑔
+𝑇𝑔 𝑑𝑣 𝑚
+̂ 𝑐𝑟 𝑅𝑔 𝑇𝑔
+=
+− 𝑅𝑔
+−
+𝑑𝜃
+𝑚𝑔 𝐶𝑣𝑔
+𝐶𝑣𝑔 𝑣 𝑑𝜃 𝑚𝑔 𝐶𝑣𝑔
+
+(37)
+
+Una vez obtenidas las propiedades termodinámicas en
+cada uno de los puntos del ciclo, es posible calcular los
+indicadores de rendimiento, en este caso, con valores más
+conservativos y realistas.
+3. Resultados
+En la primera parte de esta sección, se valida el modelo
+de cálculo para motor en arrastrado (sin combustión), con
+el fin de verificar los modelos de cálculo y la
+implementación computacional de los procesos de
+compresión, expansión, escape y admisión. En la
+segunda parte, se realiza la validación del método
+transitorio, incluyendo combustión, mediante la
+comparación con resultados numéricos validados y
+reportados en la literatura. Finalmente, se aplica el
+método a un motor diferente tomado como un caso de
+estudio para la herramienta.
+3.1. Validación del modelo de motor en arrastrado
+Con el fin de adaptar el programa a una situación de
+motor en arrastre, se trabaja el ciclo únicamente con aire,
+y no se tiene en cuenta el proceso de combustión.
+Partiendo de los datos reportados por Garrido [16] para
+un motor CFR tipo Otto analizado teórica y
+experimentalmente, se fijaron parámetros y condiciones
+de operación (geometrías, velocidad, presión y
+temperatura), con el objetivo de comparar el
+comportamiento de la presión y la temperatura a
+diferentes relaciones de compresión.
+
+(35)
+
+El proceso de admisión de aire comprende el lapso entre
+la apertura y el cierre de la válvula de admisión. En este
+caso, el balance de la masa está dado por la ecuación (36)
+considerando el flujo másico de entrada, en función de
+las propiedades de los inquemados y de las dimensiones
+de la válvula de admisión.
+
+𝑑𝑚
+𝑚𝑐𝑟
+= −𝑚
+̂ 𝑐𝑟 = −
+𝑑𝜃
+𝜔
+
+𝑑𝑇
+𝑄̂
+𝑅𝑇 𝑑𝑣 𝑚
+̂ 𝑐𝑟 (𝐶𝑝 𝑇∞ − 𝐶𝑣 𝑇)
+=
+−
++
+𝑑𝜃 𝑚𝑡 𝐶𝑣 𝐶𝑣 𝑣 𝑑𝜃 𝑚𝑡
+𝐶𝑣
+
+(36)
+
+El balance de energía, durante la admisión, está dado por
+la expresión (37), donde mt es la suma de inquemados que
+ingresan y de quemados que permanecen después del
+escape.
+
+Con base en los resultados reportados por Garrido [16]
+para flujo a través de las válvulas, se hacen ajustes a los
+parámetros de las válvulas y se adecúan los balances de
+masa y energía para considerar ángulos del eje donde
+ambas válvulas (admisión y rechazo) estén abiertas,
+como ocurre, de acuerdo con la tabla 1, entre los ángulos
+3,056 𝜋 y 1,417 𝜋.
+Los parámetros geométricos y de operación de las
+válvulas se reportan en la tabla 2, de acuerdo con los
+resultados de Garrido [16]; se incluye los ajustes
+realizados para garantizar un flujo másico adecuado para
+el funcionamiento del ciclo en función del
+comportamiento de las válvulas.
+
+Diseño de una herramienta computacional para el análisis termodinámico de motores de combustión interna
+tipo Otto
+
+Tabla 1. Ángulos de giro del cigüeñal por etapa
+Etapa
+Compresión
+Expansión
+Rechazo
+Admisión
+
+Inicio [rad]
+0
+𝜋
+1,778 𝜋
+3,056 𝜋
+
+Fin [rad]
+𝜋
+1,778 𝜋
+1,417 𝜋
+4,189 𝜋
+
+Fuente: elaboración propia.
+Tabla 2. Parámetros de válvulas
+Dato [unidades]
+Diámetro válvula [m]
+diámetro stem [m]
+Cf admisión
+Cf rechazo
+Lm
+
+Valor
+0,03014
+0,00995
+0,11
+0,068
+0,01
+
+Fuente: elaboración propia.
+
+49
+
+Los resultados obtenidos y su error relativo con respecto
+a las mediciones experimentales reportadas y la
+simulación realizada por Garrido [16] se presentan en las
+tablas 3, 4 y 5 para la presión máxima en el ciclo (final
+de la compresión), la presión a un ángulo de 3,7 rad y la
+masa de aire en el cilindro, respectivamente. La tabla 5
+hace referencia a la cantidad de masa de aire en el ciclo,
+es decir, la cantidad de aire que entra por las válvulas,
+menos el remanente, el cual es el 4 % del volumen.
+El mayor error relativo de la simulación con respecto a la
+referencia es de 5,18 % en los cálculos de presión. Se
+evidencia cómo en dos ángulos diferentes de presión
+(final de la compresión y 1,17 𝜋 rad) se obtienen
+resultados muy precisos, a pesar de utilizar simulaciones
+basadas en diferentes modelos matemáticos. De manera
+similar, para la masa de aire en el ciclo se obtiene un error
+relativo máximo de 3,46 %, teniendo en cuenta que la
+fracción remanente de gases es independiente de la
+relación de compresión, la cual es el 4 % del volumen del
+cilindro.
+
+Tabla 3. Resultados presión máxima en arrastre
+Pmax [MPa]
+Relación de
+Compresión
+10,33
+8,54
+7,78
+7,17
+6,73
+
+Simulación
+[16]
+
+Experimental [16]
+
+Resultados numéricos
+obtenidos
+
+2,066
+1,660
+1,465
+1,301
+1,205
+
+2,066
+1,641
+1,465
+1,325
+1,214
+
+2,173
+1,664
+1,449
+1,281
+1,163
+
+Error
+relativo
+simulación
+5,18 %
+0,27 %
+1,11 %
+1,55 %
+3,49 %
+
+Error relativo
+experimental
+5,18 %
+1,43 %
+1,11 %
+3,34 %
+4,20 %
+
+Fuente: elaboración propia.
+Tabla 4. Resultados presión a 1,17 𝜋 rad en arrastre
+
+Relación de
+Compresión
+10,33
+8,54
+7,78
+7,17
+6,73
+
+Simulación
+Garrido [5]
+
+Experimental
+
+0,0952
+0,0958
+0,0957
+0,0955
+0,0954
+
+0,0937
+0,0934
+0,0936
+0,0932
+0,0932
+
+P 1,17 𝝅 [MPa]
+Resultados
+Error relativo
+simulación
+simulación
+programa
+0,0954
+0,21 %
+0,0933
+2,61 %
+0,0921
+3,76 %
+0,0917
+3,98 %
+0,0909
+4,72 %
+
+Fuente: elaboración propia.
+
+Error relativo
+experimental
+1,81 %
+0,11 %
+1,60 %
+1,61 %
+2,47 %
+
+50
+
+S. Valencia-Cañola, K. Téllez-Soleimán, T. Kadowaki-Jiménez, C. Bustamante-Chaverra
+
+Tabla 5. Resultados masa de aire en el ciclo
+Masa aire [g/ciclo]
+Relación de
+compresión
+10,33
+8,54
+7,78
+7,17
+6,73
+
+Simulación
+Garrido[5]
+
+Experimental
+
+0,580
+0,578
+0,578
+0,578
+0,577
+
+0,579
+0,594
+0,587
+0,592
+0,594
+
+Resultados
+simulación
+programa
+0,597
+0,597
+0,597
+0,597
+0,597
+
+Error relativo
+simulación
+
+Error relativo
+experimental
+
+2,93 %
+3,28 %
+3,28 %
+3,28 %
+3,46 %
+
+3,11 %
+0,50 %
+1,70 %
+0,84 %
+0,50 %
+
+Fuente: elaboración propia.
+Dado que los resultados numéricos fueron comparados
+con los ensayos experimentales que reportó Garrido [16],
+y a que se obtuvo un error relativo menor al 6 % para
+todos los valores de relación de compresión, se asume
+que el modelo reproduce fielmente los procesos reales de
+compresión, expansión, escape y admisión. Sin embargo,
+estos resultados son puntuales y no permiten comprender
+el comportamiento del ciclo en función del eje del
+ángulo. En este sentido, se presentan resultados
+numéricos obtenidos para una relación de compresión de
+10,33. En los casos en que se reportaron los
+comportamientos simulados por Garrido [16], se realiza
+la comparación.
+
+fracción residual de gases, y, finalmente, aumenta en el
+proceso de admisión para volver al valor inicial. El
+remanente de (2,24*10^-5) kg está definido como el 4 %
+del volumen total, de acuerdo con la literatura.
+El comportamiento de flujo másico neto de entrada a
+través de las válvulas se puede observar en la figura 2.
+
+La figura 1 corresponde a la curva de masa total
+(inquemados más quemados) que permanecen dentro del
+cilindro, con respecto al ángulo de giro del cigüeñal.
+
+Figura 2. Flujo másico en 1 ciclo. Fuente: elaboración
+propia.
+Durante los procesos de compresión y expansión las
+válvulas permanecen cerradas por lo que el flujo es cero.
+En el escape se evidencia un aumento gradual del caudal,
+conforme la válvula se abre. En la admisión, el flujo de
+entrada ocurre de manera súbita y va disminuyendo con
+el cierre paulatino de la válvula.
+
+Figura 1. Masa en la cámara en 1 ciclo. Fuente:
+elaboración propia.
+La masa dentro del cilindro se mantiene constante
+durante los procesos de compresión y expansión; en el
+escape, la masa decrece hasta alcanzar el valor de
+
+También en la figura 2 es posible apreciar el efecto del
+solapamiento de la apertura de las válvulas. El flujo
+másico de aire correspondiente a 3,05 𝜋 tiene un valor
+medio entre los máximos de salida y entrada. Las
+discontinuidades en el comportamiento responden a la
+naturaleza discreta de los resultados numéricos.
+
+Diseño de una herramienta computacional para el análisis termodinámico de motores de combustión interna
+tipo Otto
+
+51
+
+El comportamiento de la presión en el cilindro con
+respecto al ángulo de giro del cigüeñal se presenta en la
+figura 3, junto con los resultados de la simulación de
+Garrido [16]. El comportamiento esperado presenta un
+aumento de presión en la compresión generada por el
+movimiento del pistón y su posterior disminución por la
+expansión y salida de masa. Como se puede observar, las
+tendencias y los valores de presión obtenidos son
+similares a los resultados de referencia.
+En cuanto a la temperatura de la mezcla en el cilindro, la
+figura 4 muestra el aumento ocasionado por la
+compresión, seguido por el enfriamiento asociado a la
+expansión. Al momento de la expulsión, se ve un
+aumento considerable en la temperatura, debido a la
+compresión que se da por la subida del pistón para
+rechazar la masa del sistema y, a su vez, por la
+disminución de masa dentro del mismo. Por último, se
+restablece la temperatura debido a la admisión de mezcla
+aire-combustible fría para volver a iniciar el ciclo.
+La figura 3 confirma la cercanía de resultados a lo largo
+de todo el ciclo del motor en arrastre, lo cual indica que
+el modelo reproduce fielmente el comportamiento en
+función del ángulo del eje del motor.
+
+Figura 4. Temperatura en 1 ciclo. Fuente: elaboración
+propia.
+3.2. Validación del modelo
+Con el objetivo de validar la metodología implementada
+para simular el proceso de combustión, se comparan los
+resultados con los valores obtenidos por Mohammadi et
+al. [17], mediante el uso de herramientas validadas de
+dinámica de fluidos computacional (CFD) para un motor
+de combustión interna tipo Otto.
+
+Figura 3. Presión en 1 ciclo, modelo Garrido [16] validado ( ̶ ) y modelo transitorio en arrastrado (---).
+Fuente: elaboración propia.
+
+52
+
+S. Valencia-Cañola, K. Téllez-Soleimán, T. Kadowaki-Jiménez, C. Bustamante-Chaverra
+
+En la tabla 6 se presentan los datos geométricos y de
+operación necesarios para obtener los resultados
+numéricos presentados a continuación. En la figura 5 se
+observa la comparación entre las curvas de presión que
+generan ambos modelos, mientras que en la figura 6 se
+puede observar la comparación entre las curvas de
+temperatura.
+Como se puede ver en las figuras 5 y 6, los datos
+reportados en la simulación de Mohammadi et al. [17]
+solo cubren el proceso de combustión, puesto que en el
+modelamiento de este radica su interés.
+
+Tabla 6. Datos del motor de validación
+Dato [unidades]
+Volumen desplazado [cm³]
+Número de cilindros
+Velocidad angular [rpm]
+Poder calorífico combustible [MJ/kg]
+Exceso de aire [%]
+Diámetro [cm]
+Carrera [cm]
+Radio de compresión
+Fluido de refrigeración
+
+Valor
+1997,5
+4
+3500
+44,3
+10
+8,5
+8,8
+10,3:1
+Líquido
+
+Fuente: [17].
+
+Figura 5. Presión en 1 ciclo, modelo CFD validado ( ̶ ) y modelo transitorio (---). Fuente: elaboración propia.
+
+Figura 6. Temperatura en 1 ciclo, modelo CFD validado ( ̶ ) y modelo transitorio (---). Fuente: elaboración propia.
+
+Diseño de una herramienta computacional para el análisis termodinámico de motores de combustión interna
+tipo Otto
+
+De acuerdo con las figuras mencionadas, la similitud
+entre los comportamientos de la presión es notable, así
+como los máximos de presión y temperatura. Aunque la
+tendencia de las curvas se conserva, la curva de
+enfriamiento posterior a la combustión difiere entre
+modelos. Esta diferencia en el comportamiento de la
+temperatura indica que aún es necesario mejorar los
+modelos de transferencia de calor del cilindro al
+refrigerante. Sin embargo, los puntos de similitud
+mencionados favorecen la aplicación de la presente
+metodología como una herramienta válida para la
+obtención precisa de indicadores importantes de
+rendimiento; estos dependen del comportamiento de la
+presión, la masa al interior del cilindro y el valor máximo
+de temperatura en el ciclo.
+3.3. Ciclo diurno
+En esta sección se empleará el modelo transitorio
+validado anteriormente para obtener los indicadores de
+rendimiento de un motor tipo Otto con los parámetros
+geométricos y de operación presentados en la tabla 7.
+Tabla 7. Datos del motor de validación
+Dato [unidades]
+Volumen desplazado [cm³]
+Número de cilindros
+Velocidad angular [rpm]
+Poder calorífico combustible
+[MJ/kg]
+Exceso de aire [%]
+Diámetro [cm]
+Relación carrera-diámetro
+Radio de compresión
+Fluido de refrigeración
+
+Valor
+1750
+4
+5500
+44,3
+20
+8,22
+1
+9:1
+Aire
+
+Fuente: elaboración propia.
+En la tabla 8 se comparan los parámetros de rendimiento
+obtenidos del modelo transitorio con los valores
+calculados a partir de las ecuaciones teóricas para el
+diseño básico de motores presentadas en [3] y los
+obtenidos a partir del modelo pseudotransitorio
+presentado en la sección 2.1. Se consideran condiciones
+de operación a nivel del mar, con presión atmosférica de
+101325 Pa, y temperatura ambiente de 20 °C.
+Como se puede observar en la tabla 8, los resultados
+numéricos difieren notoriamente de los valores obtenidos
+mediante el modelo teórico en [3]. Esto se debe a que en
+el modelo teórico se asumen procesos de compresión y
+expansión isentrópicos, modelo de aire frío para calcular
+
+53
+
+las propiedades termodinámicas, cero pérdidas por
+transferencia de calor y no se consideran los trabajos
+asociados a los procesos de admisión y escape.
+Tabla 8. Resultados de los indicadores con los
+diferentes modelos
+
+Indicador
+[unidad]
+Imep [kPa]
+Pi [kW]
+UP [m/s]
+Wb [J]
+Pb [kW]
+Τ [Nm]
+Wf [kW]
+Bmep [kPa]
+BSP[kW/c
+m²]
+OPD
+[kW/Lt]
+Bsfc
+[g/kW-h]
+η térmica
+[%]
+η vol. [%]
+
+Model
+o
+teóric
+o [3]
+1571,7
+0
+126,06
+15,08
+591,35
+108,41
+188,23
+17,64
+1351,6
+6
+
+Modelo
+pseudotransito
+rio
+
+Modelo
+transitor
+io
+
+1416,24
+
+826,59
+
+113,59
+15,08
+532,86
+97,69
+169,61
+15,90
+
+66,29
+15,08
+311,00
+57,01
+98,99
+9,28
+
+1217,96
+
+710,87
+
+0,50
+
+0,46
+
+0,26
+
+61,95
+
+55,82
+
+32,58
+
+196,33
+
+198,24
+
+296,35
+
+53,58
+
+48,89
+
+31,88
+
+102,62
+
+102,13
+
+90,78
+
+Fuente: elaboración propia.
+Los resultados obtenidos mediante el modelo
+pseudotransitorio son más conservadores que en el caso
+teórico, pero están más cercanos en magnitud a los
+valores ideales. Esta diferencia en los datos era esperada,
+debido a que en el modelo pseudotransitorio se
+consideran la entropía y las pérdidas de calor en los
+procesos estimadas a partir de propiedades promedio, las
+propiedades son calculadas en cada punto y se consideran
+procesos de compresión y expansión politrópica.
+Por su parte, el modelo transitorio presenta resultados
+todavía más realistas y, por lo tanto, más conservadores
+que los modelos anteriores. De acuerdo con los
+resultados reportados, la diferencia porcentual entre
+indicadores se encuentra alrededor del 50 %, lo cual
+evidencia la necesidad de implementar herramientas más
+sofisticadas para la estimación de los indicadores de
+rendimiento de motores tipo Otto.
+
+54
+
+S. Valencia-Cañola, K. Téllez-Soleimán, T. Kadowaki-Jiménez, C. Bustamante-Chaverra
+
+Esta diferencia se debe a la resolución en el cálculo de
+propiedades termodinámicas y a la aplicación de modelos
+de transporte que ofrece la discretización temporal y la
+solución de los balances diferenciales de masa y energía.
+Para confirmar lo anterior, en la figura 7 se comparan las
+curvas de presión durante un ciclo, obtenidas con el
+modelo pseudotransitorio, y el modelo transitorio para el
+motor especificado en la tabla 7. Aunque las tendencias
+se conservan durante los procesos, se puede ver la
+sobreestimación en el valor de la presión máxima del
+sistema en que incurre el modelo pseudotransitorio,
+dados los factores mencionados anteriormente.
+Con el modelo transitorio, se estructura una herramienta
+computacional que, además de indicadores relevantes
+para motores de combustión tipo Otto, puede obtener
+curvas de propiedades termodinámicas relevantes en
+términos del ángulo de giro del eje y realizar análisis más
+realistas y conservadores que los modelos
+convencionalmente empleados para el dimensionamiento
+preliminar y el análisis termodinámico de este tipo de
+motores.
+4. Conclusiones
+Se desarrolla una herramienta para simular e integrar los
+procesos termodinámicos que se presentan en un ciclo de
+motor tipo Otto, incluyendo transferencia de calor,
+procesos no isentrópicos de compresión y expansión,
+proceso de combustión condicionada por la velocidad de
+llama y procesos de admisión y escape considerando
+flujo compresible a través de las válvulas.
+
+El modelo de flujo compresible a través de las válvulas,
+incluido en los balances de masa total en el cilindro, se
+aproxima al funcionamiento real de un motor, de acuerdo
+con el comportamiento de la presión y la masa obtenida,
+comparadas en la validación realizada para un motor en
+condición de arrastre (sin combustión).
+Al simular un motor incluyendo el proceso de
+combustión, se obtienen comportamientos cercanos a los
+valores de referencia en cuanto al comportamiento de la
+presión y la masa total en el cilindro. Aunque la
+temperatura presenta diferencias en el proceso de
+expansión, la tendencia obtenida y los valores máximos
+de temperatura se ajustan a los valores de referencia.
+Lo anterior evidencia una adecuada modelación del
+proceso de combustión y permite encontrar valores más
+realistas de los parámetros de rendimiento del motor,
+puesto que dependen en mayor medida de los valores
+máximos de temperatura y presión del ciclo. Se confirma
+a partir de la diferencia en los parámetros de rendimiento
+obtenidos para un motor de prueba con la herramienta
+computacional desarrollada (modelo transitorio) y dos
+modelos simplificados, uno que asume cantidades
+promedio
+entre
+puntos
+del
+ciclo
+(modelo
+pseudotransitorio) y otro que considera procesos de
+expansión y compresión isentrópicos, procesos
+adiabáticos y la suposición de aire frío (modelo teórico).
+
+Figura 7. Presión en 1 ciclo, modelo pseudotransitorio ( ̶ ) y modelo transitorio (---).
+Fuente: elaboración propia.
+
+Diseño de una herramienta computacional para el análisis termodinámico de motores de combustión interna
+tipo Otto
+
+Los indicadores obtenidos mediante el modelo transitorio
+están, en su mayoría, alrededor del 50 % de los estimados
+mediante los modelos simplificados, lo cual confirma que
+el uso de modelos muy simplificados en el
+dimensionamiento y análisis de motores tipo Otto puede
+llevar a resultados poco realistas.
+Como trabajo futuro, se plantea mejorar la estimación de
+la velocidad de llama y el modelo de transferencia de
+calor en las fases de expansión, escape y admisión.
+Financiamiento
+Este artículo es parte de la producción del proyecto de
+investigación interno “Análisis termodinámico de
+motores de combustión interna para aplicaciones
+aeronáuticas”, adscrito al Semillero de Termofluidos y
+Conversión de Energía, y financiado por la Universidad
+Pontificia Bolivariana. Año de inicio: 2018, año de
+finalización: 2019.
+
+55
+
+[8] M. J. Abedin, H. H. Masjuki, M. A. Kalam, A.
+Sanjid, S. M. A. Rahman, B. M. Masum, “Energy
+balance of internal combustion engines using alternative
+fuels”, Renew. Sustain. Energy Rev., vol. 26, pp. 20-33,
+2013, doi: https://doi.org/10.1016/j.rser.2013.05.049.
+[9] A. Alagumalai, “Internal combustion engines:
+Progress and prospects”, Renewable and Sustainable
+Energy Reviews, vol. 38, pp. 561-571, 2014, doi:
+https://doi.org/10.1016/j.rser.2014.06.014.
+[10]N. Cantera Developers, “Cantera”, 2019. [En línea].
+Disponible en: https://cantera.org/.
+[11]Python-Software-Foundation,
+“Welcome
+Python.org,” 2001. [En línea]. Disponible
+https://www.python.org/.
+
+to
+en:
+
+[12]A. Lavine, D. D. Frank Incropera, T Bergman, P.
+Dewitt, Fundamentals of heat and mass transfer, 7th ed.
+USA: Jhon Wiley & Sons, 2011.
+
+Referencias
+[1] J. B. Heywood, Internal combustion engine
+fundamentals. McGraw Hill, 1988.
+[2] F. Taylor, The Internal-Combustion Engine in
+Theory and Practice, 2nd ed., vol. I. Massachusetts, MA,
+USA: The MIT Press, 1985.
+[3] W. W. Pulkrabek, Engineering fundamentals of the
+internal combustion engine, 2nd ed. University of New
+Jersey, NJ, USA: Prentice-Hall, 2003.
+[4] A. E. Figueiredo et al., “Computer Simulation of an
+Internal Combustion Engine”, trabajo de maestría,
+University of Maryland, Baltimore, MD, USA, 2008.
+[5] W. M. Ambrós et al., “Experimental analysis and
+modeling of internal combustion engine operating with
+wet ethanol”, Fuel, vol. 158, pp. 270-278, 2015, doi:
+https://doi.org/10.1016/j.fuel.2015.05.009.
+[6] A. Barjaneh, H. Sayyaadi, “A new closed-form
+thermodynamic model for thermal simulation of spark
+ignition internal combustion engines”, Energy Convers.
+Manag., vol. 105, pp. 607-616, 2015, doi:
+https://doi.org/10.1016/j.enconman.2015.08.008.
+[7] M. M. Nunes, D. Faria, J. P. Vargas, M. Bueno, S.
+M. M. Elmassalami, C. R. Pereira, “Thermodynamic
+simulation model for predicting the performance of spark
+ignition engines using biogas as fuel”, Energy Convers.
+Manag., vol. 149, pp. 1096-1108, 2017, doi:
+https://doi.org/10.1016/j.enconman.2017.06.045.
+
+[13]O. Spitsov, “Heat transfer inside internal combustion
+engine: modelling and comparison with experimental
+data”, treabajo de maestría, Lappeenranta University of
+Technology, Finlandia, 2013.
+[14]The-SciPy-community, “scipy.integrate.odeint —
+SciPy v1.3.0 Reference Guide”, 2008. [En línea].
+Disponible
+en:
+https://docs.scipy.org/doc/scipy/reference/generated/sci
+py.integrate.odeint.html.
+[15]The_SciPy-community, “scipy.integrate.solve_ivp
+— SciPy v1.3.0 Reference Guide”, 2008. [En línea].
+Disponible
+en:
+https://docs.scipy.org/doc/scipy/reference/generated/sci
+py.integrate.solve_ivp.html.
+[16] E. Garrido, N. Fonseca, J. Casanova, “Estudio de
+combustión de bioetanol y gasolina 95 en un motor CFR
+con AVL Boost”, trabajo de grado, Universidad
+Politécnica de Madrid, 2016.
+[17]A. Mohammadi, M. Yaghoubi, M. Rashidi,
+“Analysis of local convective heat transfer in a spark
+ignition engine ☆”, Int. Commun. Heat Mass Transf.,
+vol.
+35,
+pp.
+215-224,
+2008,
+doi:
+https://doi.org/10.1016/j.icheatmasstransfer.2007.06.008
+
+
