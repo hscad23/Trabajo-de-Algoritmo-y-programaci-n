@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from engine_model import simulate_ideal_otto_cycle
 
-app = FastAPI(title="TermoOtto API", description="API para Simulación de Ciclo Otto")
+app = FastAPI()
+    title="TermoOtto API"
+    description="API para Simulación de Ciclo Otto"
 
 app.add_middleware(
     CORSMiddleware,
