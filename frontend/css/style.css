@@ -4,13 +4,13 @@
     --bg-glass: rgba(26, 29, 36, 0.7);
     --border-color: rgba(255, 255, 255, 0.08);
 
-    --text-main: #f0f4f8;
-    --text-muted: #8b949e;
+    --text-main: #FFFFFF;
+    --text-muted: #D8C7CE;
 
-    --accent-primary: #00e5ff;
+    --accent-primary: #F8C8DC;
     --accent-primary-glow: rgba(0, 229, 255, 0.4);
-    --accent-secondary: #ff3366;
-    --accent-success: #00e676;
+    --accent-secondary: #FFDDEB;
+    --accent-success: #BEEFD8;
 
     --font-sans: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
