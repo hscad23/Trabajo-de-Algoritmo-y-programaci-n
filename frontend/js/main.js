@@ -332,14 +332,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Llamada a la API real
-            const response = await fetch(`http://localhost:8000/simulate?r=${r}&rpm=${rpm}&stroke=${stroke}&bore=${bore}`);
-            const json = await response.json();
+            const response = await fetch(`https://termo-otto-backend.onrender.com/simulate?r=${r}&rpm=${rpm}&stroke=${stroke}&bore=${bore}`);
+const json = await response.json();
 
-            if (json.status !== "success") {
-                throw new Error("Simulación falló");
-            }
+if (json.status !== "success") {
+    throw new Error("Simulación falló");
+}
 
-            const data = json.data;
+const data = json.data;
 
             // Generar pares (x, y) = (Volumen, Presión) para Chart.js
             const chartData = data.volume.map((v, i) => ({
